@@ -116,6 +116,11 @@
         } else {
           deviceClasses.push(newValue);
         }
+
+        if (this.orientation === 'landscape') {
+          deviceClasses.push('landscape');
+        }
+
         Polymer.dom(marvelDevice).setAttribute('class', deviceClasses.join(" "));
       },
 
@@ -171,7 +176,7 @@
         }
 
         var zoom = 1.0*calcWidth / mdWidth;
-
+        if (zoom > 1) { zoom = 1; }
         marvelDevice.style.zoom = zoom;
         marvelDevice.style.transform = "scale("+zoom+")";
         marvelDevice.style['transform-origin'] = "0 0";
