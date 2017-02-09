@@ -1,0 +1,184 @@
+<link rel="import" href="../tangere/tangere.html">
+<link rel="import" href="styles/devices-styles.html">
+
+<dom-module id="at-core-dframe">
+  <template>
+    <style include="devices-styles"></style>
+    <style>
+      :host {
+        display: block;
+        box-sizing: border-box;
+      }
+    </style>
+
+    <div id="marvelDevice" class="marvel-device">
+      <div class="top-bar"></div>
+      <div class="sleep"></div>
+      <div class="volume"></div>
+      <div class="camera"></div>
+      <div class="sensor"></div>
+      <div class="speaker"></div>
+      <div class="screen">
+        <iframe id="contentFrame" src="{{src}}" width="100%" height="100%" frameborder="0"></iframe>
+      </div>
+      <div class="home"></div>
+      <div class="bottom-bar"></div>
+    </div>
+  </template>
+  <script>
+    'use strict';
+    Polymer({
+      is: 'at-core-dframe',
+      properties: {
+
+        src: {
+          type: String,
+          value: ""
+        },
+
+        deviceType: {
+          type: String,
+          value: "iphone5s_silver",
+          observer: "_deviceTypeChanged",
+          xtype: "enum",
+          xvaluelist: [{
+              title: "iPhone 5S White",
+              value: "iphone5s_silver"
+            },
+            {
+              title: "iPhone 6 Black",
+              value: "iphone6_black"
+            },
+            {
+              title: "iPhone 6 White",
+              value: "iphone6_silver"
+            },
+            {
+              title: "iPad Mini White",
+              value: "ipad_silver"
+            },
+            {
+              title: "Nexus 5",
+              value: "nexus5"
+            },
+            {
+              title: "MacBookPro",
+              value: "macbook"
+            }
+          ]
+        },
+
+        orientation: {
+          type: String,
+          value: "portrait",
+          observer: '_orientationChanged',
+          xtype: 'enum',
+          xvaluelist: [{
+              title: "Portrait",
+              value: "portrait"
+            },
+            {
+              title: "Landscape",
+              value: "landscape"
+            }
+          ]
+        },
+
+        maxWidth: {
+          type: Number,
+          value: 0
+        },
+
+        maxHeight: {
+          type: Number,
+          value: 0
+        }
+      },
+
+      observers: [
+        '_applyMaxWidthHeight(maxWidth, maxHeight)'
+      ],
+
+      ready: function() {
+
+      },
+
+      _deviceTypeChanged: function (newValue, oldValue) {
+        if (!newValue) { return; }
+        var marvelDevice = this.$.marvelDevice;
+        var deviceClasses = [ "at-core-dframe", "marvel-device" ];
+
+        if (newValue.indexOf("_") > -1) {
+          var parts = newValue.split('_');
+          parts.forEach(function (part, index) {
+            deviceClasses.push(part);
+          });
+        } else {
+          deviceClasses.push(newValue);
+        }
+        Polymer.dom(marvelDevice).setAttribute('class', deviceClasses.join(" "));
+      },
+
+      _orientationChanged: function (newValue, oldValue) {
+        var marvelDevice = this.$.marvelDevice;
+        this.toggleClass('landscape', newValue === "landscape", marvelDevice);
+      },
+
+      _applyMaxWidthHeight: function (maxWidthParam, maxHeightParam) {
+        var maxWidth = parseInt(maxWidthParam);
+        if (window.isNaN(maxWidth)) { maxWidth = 0; }
+
+        var maxHeight = parseInt(maxHeightParam);
+        if (window.isNaN(maxHeight)) { maxHeight = 0; }
+
+        var marvelDevice = this.$.marvelDevice;
+
+        // clear max width / height
+        marvelDevice.style.width = "";
+        marvelDevice.style.height = "";
+
+        // clear zoom and transform
+        marvelDevice.style.zoom = "";
+        marvelDevice.style.transform = "";
+        marvelDevice.style['transform-origin'] = "";
+
+        if (maxWidth < 1 && maxHeight < 1) { return; }
+
+        console.log(maxWidth + ', ' + maxHeight);
+
+        var mdStyle = window.getComputedStyle(marvelDevice);
+        var mdWidthProp = mdStyle.getPropertyValue('width');
+        var mdHeightProp = mdStyle.getPropertyValue('height');
+        var mdWidth = parseInt(mdWidthProp);
+        var mdHeight = parseInt(mdHeightProp);
+        var aspectRatio = 1.0*mdWidth / mdHeight;
+
+        var calcWidth;
+        var calcHeight;
+
+        if (maxWidth > 0 && maxHeight < 1) {
+          // apply maxWidth
+          calcWidth = maxWidth;
+          calcHeight = Math.floor(maxWidth/aspectRatio);
+        } else if (maxWidth < 1 && maxHeight > 0) {
+          // apply maxHeight
+          calcWidth = Math.floor(maxHeight*aspectRatio);
+          calcHeight = maxHeight;
+        } else {
+          // we have both maxWidth and maxHeight
+          // maxWidth will take precedence over maxHeight
+          // apply maxWidth
+          calcWidth = maxWidth;
+          calcHeight = Math.floor(maxWidth/aspectRatio);
+        }
+
+        var zoom = 1.0*calcWidth / mdWidth;
+
+        marvelDevice.style.zoom = zoom;
+        marvelDevice.style.transform = "scale("+zoom+")";
+        marvelDevice.style['transform-origin'] = "0 0";
+      }
+
+    });
+  </script>
+</dom-module>
