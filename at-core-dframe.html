@@ -149,9 +149,9 @@
 
         if (maxWidth < 1 && maxHeight < 1) { return; }
 
-        var mdStyle = window.getComputedStyle(marvelDevice);
-        var mdWidthProp = mdStyle.getPropertyValue('width');
-        var mdHeightProp = mdStyle.getPropertyValue('height');
+        var mdClientRect = marvelDevice.getBoundingClientRect();
+        var mdWidthProp = mdClientRect.width;
+        var mdHeightProp = mdClientRect.height;
         var mdWidth = parseInt(mdWidthProp);
         var mdHeight = parseInt(mdHeightProp);
         var aspectRatio = 1.0*mdWidth / mdHeight;
@@ -169,14 +169,22 @@
           calcHeight = maxHeight;
         } else {
           // we have both maxWidth and maxHeight
-          // maxWidth will take precedence over maxHeight
-          // apply maxWidth
-          calcWidth = maxWidth;
-          calcHeight = Math.floor(maxWidth/aspectRatio);
+          // check which one is smaller and use that
+          if (maxWidth > maxHeight)  {
+            // use maxHeight
+            calcHeight = maxHeight;
+            calcWidth = Math.floor(aspectRatio * maxHeight);
+          } else {
+            // use maxWidth
+            calcWidth = maxWidth;
+            calcHeight = Math.floor(maxWidth/aspectRatio);
+          }
+
         }
 
         var zoom = 1.0*calcWidth / mdWidth;
         if (zoom > 1) { zoom = 1; }
+        console.log('zoom ' + zoom);
         marvelDevice.style.zoom = zoom;
         marvelDevice.style.transform = "scale("+zoom+")";
         marvelDevice.style['transform-origin'] = "0 0";
