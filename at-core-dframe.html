@@ -8,6 +8,7 @@
       :host {
         display: block;
         box-sizing: border-box;
+        overflow: hidden;
       }
     </style>
 
@@ -143,7 +144,7 @@
         marvelDevice.style.height = "";
 
         // clear zoom and transform
-        marvelDevice.style.zoom = "";
+        // marvelDevice.style.zoom = "";
         marvelDevice.style.transform = "";
         marvelDevice.style['transform-origin'] = "";
 
@@ -184,10 +185,12 @@
 
         var zoom = 1.0*calcWidth / mdWidth;
         if (zoom > 1) { zoom = 1; }
-        console.log('zoom ' + zoom);
-        marvelDevice.style.zoom = zoom;
+        // console.log('zoom ' + zoom);
+        // marvelDevice.style.zoom = zoom;
         marvelDevice.style.transform = "scale("+zoom+")";
         marvelDevice.style['transform-origin'] = "0 0";
+
+        this.style.height = calcHeight +'px';
       }
 
     });
