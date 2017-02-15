@@ -8,7 +8,9 @@
       :host {
         display: block;
         box-sizing: border-box;
+
         overflow: hidden;
+        text-align: center;
       }
     </style>
 
@@ -101,7 +103,28 @@
       ],
 
       ready: function() {
+        var windowInnerHeight = window.innerHeight;
+        var self = this;
+        /*
+          This setInterval is a hack to resize the dframe in playground because
+          initially dframe is not sized correctly and produces verticall scrollbar
+          this hack makes sure the verticall scrollbar disappers
+          I worry the most about bodyHeight < windowInnerHeight producing an infinite loop
+        */
+        var bodyZeroInterval = setInterval(function() {
+          self._applyMaxWidthHeight();
+          var bodyHeight = document.body.getBoundingClientRect().height;
+          windowInnerHeight = window.innerHeight;
+          // we use diff here because direct comparison is not reliable enough
+          var diff = bodyHeight - windowInnerHeight;
+          if (Math.abs(diff) < 20) {
+            clearInterval(bodyZeroInterval);
+          }
+        }, 100);
 
+        window.addEventListener('resize', function(event) {
+          self._applyMaxWidthHeight();
+        });
       },
 
       _deviceTypeChanged: function (newValue, oldValue) {
@@ -123,6 +146,9 @@
         }
 
         Polymer.dom(marvelDevice).setAttribute('class', deviceClasses.join(" "));
+
+        this._applyMaxWidthHeight();
+
         if (newValue == "macbook") {
           /* this padding-left is added so that macbook pro image is not cutoff on the left in playground */
           this.style['padding-left'] = '40px';
@@ -135,6 +161,7 @@
       _orientationChanged: function (newValue, oldValue) {
         var marvelDevice = this.$.marvelDevice;
         this.toggleClass('landscape', newValue === "landscape", marvelDevice);
+        this._applyMaxWidthHeight();
       },
 
       _applyMaxWidthHeight: function (maxWidthParam, maxHeightParam) {
@@ -155,7 +182,26 @@
         marvelDevice.style.transform = "";
         marvelDevice.style['transform-origin'] = "";
 
-        if (maxWidth < 1 && maxHeight < 1) { return; }
+        if (maxWidth < 1 && maxHeight < 1) {
+          this.style.height = "";
+
+          maxWidth = this.offsetWidth;
+          maxHeight = this.offsetHeight;
+
+          var bodyHeight = document.body.getBoundingClientRect().height;
+          var windowInnerHeight = window.innerHeight;
+
+          if (bodyHeight > windowInnerHeight) {
+            var diff = bodyHeight - windowInnerHeight + 2; // +2 is a magic number that makes vertical scroll go away
+            maxHeight = maxHeight - diff;
+          }
+
+          if (this.deviceType === "macbook") {
+            maxWidth = maxWidth - 80;
+          }
+
+          if (!maxWidth || !maxHeight) { return; }
+        }
 
         var mdClientRect = marvelDevice.getBoundingClientRect();
         var mdWidthProp = mdClientRect.width;
@@ -177,27 +223,35 @@
           calcHeight = maxHeight;
         } else {
           // we have both maxWidth and maxHeight
-          // check which one is smaller and use that
-          if (maxWidth > maxHeight)  {
+          // check which one is smaller than deviceDiv dimensions and use that
+
+          if (maxHeight < mdHeight) {
+            // deviceDiv can not fit into maxHeight
             // use maxHeight
             calcHeight = maxHeight;
             calcWidth = Math.floor(aspectRatio * maxHeight);
-          } else {
+          } else if (maxWidth < mdWidth) {
+            // deviceDiv can not fit into maxWidth
             // use maxWidth
             calcWidth = maxWidth;
             calcHeight = Math.floor(maxWidth/aspectRatio);
+          } else {
+            calcHeight = mdHeight;
+            calcWidth = mdWidth;
           }
-
         }
 
         var zoom = 1.0*calcWidth / mdWidth;
         if (zoom > 1) { zoom = 1; }
-        // console.log('zoom ' + zoom);
         // marvelDevice.style.zoom = zoom;
         marvelDevice.style.transform = "scale("+zoom+")";
         marvelDevice.style['transform-origin'] = "0 0";
 
-        this.style.height = calcHeight +'px';
+        if (zoom !== 1) {
+          this.style.height = calcHeight +'px';
+        } else {
+          this.style.height = "";
+        }
       }
 
     });
