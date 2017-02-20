@@ -8,6 +8,8 @@
       :host {
         display: inline-block;
         box-sizing: border-box;
+
+        overflow: hidden;
       }
     </style>
 
@@ -173,13 +175,15 @@
 
         var marvelDevice = this.$.marvelDevice;
 
+        this.style.height = '';
+
         // clear max width / height
         marvelDevice.style.width = "";
         marvelDevice.style.height = "";
 
         // clear zoom and transform
-        marvelDevice.style.transform = "";
         marvelDevice.style['transform-origin'] = "";
+        marvelDevice.style.transform = "";
 
         if (maxWidth < 1 && maxHeight < 1) {
 
@@ -233,9 +237,16 @@
 
         var zoom = 1.0*calcWidth / mdWidth;
         if (zoom > 1) { zoom = 1; }
-        // marvelDevice.style.zoom = zoom;
+
         marvelDevice.style.transform = "scale("+zoom+")";
-        marvelDevice.style['transform-origin'] = "0 0";
+
+        var computedStyle = window.getComputedStyle(document.getElementById('marvelDevice'));
+        var mdTopMargin = computedStyle.getPropertyValue('margin-top');
+        var mdLeftMargin = computedStyle.getPropertyValue('margin-left');
+        console.log(mdTopMargin + "," + mdLeftMargin);
+        marvelDevice.style['transform-origin'] = "-" + mdLeftMargin + " -" + mdTopMargin + " 0px";
+
+        this.style.height = calcHeight + 'px';
       }
 
     });
