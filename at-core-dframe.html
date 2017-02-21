@@ -45,27 +45,39 @@
           xtype: "enum",
           xvaluelist: [{
               title: "iPhone 5S White",
-              value: "iphone5s_silver"
+              value: "iphone5s_silver",
+              width: 368,
+              height: 782
             },
             {
               title: "iPhone 6 Black",
-              value: "iphone6_black"
+              value: "iphone6_black",
+              width: 431,
+              height: 877
             },
             {
               title: "iPhone 6 White",
-              value: "iphone6_silver"
+              value: "iphone6_silver",
+              width: 431,
+              height: 877
             },
             {
               title: "iPad Mini White",
-              value: "ipad_silver"
+              value: "ipad_silver",
+              width: 626,
+              height: 948
             },
             {
               title: "Nexus 5",
-              value: "nexus5"
+              value: "nexus5",
+              width: 358,
+              height: 708
             },
             {
               title: "MacBookPro",
-              value: "macbook"
+              value: "macbook",
+              width: 1188,
+              height: 720
             }
           ]
         },
@@ -100,37 +112,6 @@
       observers: [
         '_applyMaxWidthHeight(maxWidth, maxHeight)'
       ],
-
-      /*
-        width and height of each device which includes iframe width and heigth (device display)
-        padding and margins which are used to display device frame (device frame displays hardware buttons and such)
-      */
-      __deviceDimensions: {
-        iphone5s_silver: {
-          width: 368,
-          height: 782
-        },
-        iphone6_black: {
-          width: 431,
-          height: 877
-        },
-        iphone6_silver: {
-          width: 431,
-          height: 877
-        },
-        ipad_silver: {
-          width: 626,
-          height: 948
-        },
-        nexus5: {
-          width: 358,
-          height: 708
-        },
-        macbook: {
-          width: 1188,
-          height: 720
-        }
-      },
 
       ready: function() {
       },
@@ -194,7 +175,12 @@
           if (!maxWidth || !maxHeight) { return; }
         }
 
-        var mdClientRect = this.__deviceDimensions[this.deviceType];
+        var deviceList = this.properties.deviceType.xvaluelist;
+        var self = this;
+        var mdClientRect = deviceList.find(function (device) {
+          return device.value === self.deviceType;
+        });
+
         var mdWidth = this.orientation === "portrait" ? mdClientRect.width : mdClientRect.height;
         var mdHeight = this.orientation === "portrait" ? mdClientRect.height : mdClientRect.width;
 
