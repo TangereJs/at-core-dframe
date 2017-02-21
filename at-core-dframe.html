@@ -206,17 +206,34 @@
           // we have both maxWidth and maxHeight
           // check which one is smaller than deviceDiv dimensions and use that
 
-          if (maxHeight < mdHeight) {
+          if (mdHeight > maxHeight) {
             // deviceDiv can not fit into maxHeight
             // use maxHeight
             calcHeight = maxHeight;
             calcWidth = Math.floor(aspectRatio * maxHeight);
-          } else if (maxWidth < mdWidth) {
+
+            // check if calcWidth can fit into maxWidth
+            if (calcWidth > maxWidth) {
+              // device can not fit into maxWidth; scale to maxWidth
+              calcWidth = maxWidth;
+              calcHeight = Math.floor(maxWidth / aspectRatio);
+            }
+
+          } else if (mdWidth > maxWidth) {
             // deviceDiv can not fit into maxWidth
             // use maxWidth
             calcWidth = maxWidth;
             calcHeight = Math.floor(maxWidth/aspectRatio);
+
+            // check if calcHeight can fit into maxHeight
+            if (calcHeight > maxHeight) {
+              // device can not fit into maxHeight; scale to maxHeight
+              calcHeight = maxHeight;
+              calcWidth = Math.floor(aspectRatio * maxHeight);
+            }
+
           } else {
+            // device dimensions are smaller than maxHeight and maxWidth; use device dimensions
             calcHeight = mdHeight;
             calcWidth = mdWidth;
           }
