@@ -21,7 +21,7 @@
       <div class="sensor"></div>
       <div class="speaker"></div>
       <div class="screen">
-        <iframe id="contentFrame" src="{{src}}" width="100%" height="100%" frameborder="0"></iframe>
+        <iframe id="contentFrame" src="{{src}}" width="100%" height="100%" frameborder="0" on-load="_onload"></iframe>
       </div>
       <div class="home"></div>
       <div class="bottom-bar"></div>
@@ -113,7 +113,19 @@
         '_applyMaxWidthHeight(maxWidth, maxHeight)'
       ],
 
-      ready: function() {
+      ready: function () {
+        this._iframe = this.$.contentFrame;
+      },
+      reload: function () {       
+        this.$.contentFrame.contentWindow.location.reload(true);
+      },
+      setHash: function(h) {
+        this.$.contentFrame.contentWindow.location.hash = h;
+      },
+      _onload: function (e) {
+        // refire internal event
+        if (!e.srcElement.src) return; // don't fire without url
+        this.fire("load");
       },
 
       _deviceTypeChanged: function (newValue, oldValue) {
