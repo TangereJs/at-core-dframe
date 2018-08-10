@@ -124,7 +124,9 @@
       },
       _onload: function (e) {
         // refire internal event
-        if (!e.srcElement.src) return; // don't fire without url
+        // e.srcElement doesn't exist in FF, instead explicitOriginalTarget should ber used
+        var srcElement = e.srcElement || e.explicitOriginalTarget;
+        if (!srcElement.src) return; // don't fire without url
         this.fire("load");
       },
 
